@@ -31,6 +31,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   final TextEditingController supplierController = TextEditingController();
   final TextEditingController stockQuantityController = TextEditingController();
   final TextEditingController remarksController = TextEditingController();
+  final TextEditingController soldPriceController = TextEditingController();
 
   // Dropdown options
   static const List<String> categories = ['ME', 'LE', 'HE', 'MN', 'LN', 'KN', 'MB', 'LB', 'KB', 'A'];
@@ -66,6 +67,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
       supplierController.text = widget.item!['supplier'] ?? '';
       stockQuantityController.text = widget.item!['stockQuantity']?.toString() ?? '';
       remarksController.text = widget.item!['remarks'] ?? '';
+      soldPriceController.text = widget.item!['soldPrice']?.toString() ?? '';
       form['imageUrl'] = widget.item!['imageUrl'];
       if (widget.item!['dateAdded'] != null) {
         selectedDate = DateTime.parse(widget.item!['dateAdded']);
@@ -152,6 +154,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     supplierController.dispose();
     stockQuantityController.dispose();
     remarksController.dispose();
+    soldPriceController.dispose();
     super.dispose();
   }
   @override
@@ -427,6 +430,18 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: soldPriceController,
+                              decoration: const InputDecoration(
+                                labelText: 'Price Sold (₱)',
+                                hintText: 'Optional - price when sold',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.sell),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onSaved: (v) => form['soldPrice'] = double.tryParse(v ?? ''),
                             ),
                           ],
                         ),
