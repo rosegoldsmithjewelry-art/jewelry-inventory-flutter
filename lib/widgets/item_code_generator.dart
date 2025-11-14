@@ -15,11 +15,16 @@ class _ItemCodeGeneratorState extends State<ItemCodeGenerator> {
   String itemCode = '';
 
   final Map<String, String> prefixes = {
-    'LR': 'Ladies Ring',
-    'MR': 'Men’s Ring',
-    'SE': 'Stud Earrings',
-    'NK': 'Necklace',
-    'BR': 'Bracelet',
+    'ME': 'Men Earrings',
+    'LE': 'Ladies Earrings',
+    'HE': 'Hypo Earrings',
+    'MN': 'Mens Necklace',
+    'LN': 'Ladies Necklace',
+    'KN': 'Kids Necklace',
+    'MB': 'Mens Bracelet',
+    'LB': 'Ladies Bracelet',
+    'KB': 'Kids Bracelet',
+    'A': 'Anklet',
   };
 
   void _updateItemCode() {

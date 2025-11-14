@@ -23,7 +23,6 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   // Controllers for pre-filling
   final TextEditingController itemNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController karatController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController lengthController = TextEditingController();
   final TextEditingController sizeController = TextEditingController();
@@ -34,12 +33,15 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   final TextEditingController remarksController = TextEditingController();
 
   // Dropdown options
-  static const List<String> categories = ['EARRINGS', 'NECKLACE', 'BRACELET', 'RINGS', 'ANKLET'];
+  static const List<String> categories = ['ME', 'LE', 'HE', 'MN', 'LN', 'KN', 'MB', 'LB', 'KB', 'A'];
 
-  static const List<String> metalTypes = ['SILVER GOLD', 'GOLD', 'STAINLESS'];
+  static const List<String> metalTypes = ['SILVER', 'GOLD', 'STAINLESS'];
+
+  static const List<String> karats = ['92.5 ITALY SILVER', '22 KARAT GOLD', '18 KARAT GOLD', '10 KARAT GOLD', 'FANCY GOLD'];
 
   String? selectedCategory;
   String? selectedMetalType;
+  String? selectedKarat;
   DateTime? selectedDate;
   String generatedCode = '';
   bool isEditing = false;
@@ -55,7 +57,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
       descriptionController.text = widget.item!['description'] ?? '';
       selectedCategory = widget.item!['category'];
       selectedMetalType = widget.item!['metalType'];
-      karatController.text = widget.item!['karat'] ?? '';
+      selectedKarat = widget.item!['karat'];
       weightController.text = widget.item!['weight']?.toString() ?? '';
       lengthController.text = widget.item!['length']?.toString() ?? '';
       sizeController.text = widget.item!['size'] ?? '';
@@ -101,6 +103,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     form['itemCode'] = generatedCode;
     form['category'] = selectedCategory;
     form['metalType'] = selectedMetalType;
+    form['karat'] = selectedKarat;
     form['dateAdded'] = selectedDate?.toIso8601String() ?? '';
     debugPrint('Saving item with data: $form');
     try {
@@ -121,11 +124,26 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     }
   }
 
+  String _getCategoryName(String code) {
+    switch (code) {
+      case 'ME': return 'Men Earrings';
+      case 'LE': return 'Ladies Earrings';
+      case 'HE': return 'Hypo Earrings';
+      case 'MN': return 'Mens Necklace';
+      case 'LN': return 'Ladies Necklace';
+      case 'KN': return 'Kids Necklace';
+      case 'MB': return 'Mens Bracelet';
+      case 'LB': return 'Ladies Bracelet';
+      case 'KB': return 'Kids Bracelet';
+      case 'A': return 'Anklet';
+      default: return code;
+    }
+  }
+
   @override
   void dispose() {
     itemNameController.dispose();
     descriptionController.dispose();
-    karatController.dispose();
     weightController.dispose();
     lengthController.dispose();
     sizeController.dispose();
@@ -271,7 +289,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                                 prefixIcon: Icon(Icons.category),
                               ),
                               initialValue: selectedCategory,
-                              items: categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+                              items: categories.map((cat) => DropdownMenuItem(value: cat, child: Text(_getCategoryName(cat)))).toList(),
                               onChanged: (value) => setState(() => selectedCategory = value),
                               validator: (value) => value == null ? 'Required' : null,
                             ),
@@ -305,16 +323,16 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 12),
-                            TextFormField(
-                              controller: karatController,
+                            DropdownButtonFormField<String>(
                               decoration: const InputDecoration(
                                 labelText: 'Karat',
-                                hintText: 'e.g. 18K',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.star),
                               ),
-                              onSaved: (v) => form['karat'] = v,
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              initialValue: selectedKarat,
+                              items: karats.map((karat) => DropdownMenuItem(value: karat, child: Text(karat))).toList(),
+                              onChanged: (value) => setState(() => selectedKarat = value),
+                              validator: (value) => value == null ? 'Required' : null,
                             ),
                             const SizedBox(height: 12),
                             Row(
@@ -384,7 +402,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                                   child: TextFormField(
                                     controller: priceController,
                                     decoration: const InputDecoration(
-                                      labelText: 'Price (₱)',
+                                      labelText: 'Selling Price (₱)',
                                       hintText: 'e.g. 1500.00',
                                       border: OutlineInputBorder(),
                                       prefixIcon: Icon(Icons.attach_money),
@@ -399,7 +417,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                                   child: TextFormField(
                                     controller: supplierPriceController,
                                     decoration: const InputDecoration(
-                                      labelText: 'Supplier Price (₱)',
+                                      labelText: 'Cost Price (₱)',
                                       hintText: 'Optional',
                                       border: OutlineInputBorder(),
                                       prefixIcon: Icon(Icons.business),
