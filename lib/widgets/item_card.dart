@@ -26,12 +26,12 @@ class ItemCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: item['imageUrl'] != null && item['imageUrl'] != ''
-                      ? CachedNetworkImage(
-                          imageUrl: item['imageUrl'],
-                          width: 72,
-                          height: 72,
-                          fit: BoxFit.cover,
-                        )
+                            ? CachedNetworkImage(
+                                imageUrl: item['imageUrl'],
+                                width: 84,
+                                height: 84,
+                                fit: BoxFit.cover,
+                              )
                       : Container(
                           width: 72,
                           height: 72,
@@ -81,9 +81,10 @@ class ItemCard extends StatelessWidget {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                minimumSize: const Size(64, 44),
               ),
-              child: const Text('Add'),
+              child: const Text('Add', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

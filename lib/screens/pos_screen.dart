@@ -343,7 +343,6 @@ class _PosScreenState extends State<PosScreen> {
             ),
           ),
           Expanded(
-            child: cart.isEmpty
                 ? const Center(child: Text('Cart is empty'))
                 : ListView.builder(
                     itemCount: cart.length,
@@ -352,6 +351,12 @@ class _PosScreenState extends State<PosScreen> {
                       final stock = int.tryParse(item['stockQuantity']?.toString() ?? '0') ?? 0;
                       final over = item['quantity'] > stock;
                       return ListTile(
+                        leading: item['imageUrl'] != null && item['imageUrl'] != ''
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(item['imageUrl'], width: 48, height: 48, fit: BoxFit.cover),
+                              )
+                            : const Icon(Icons.image, size: 48),
                         title: Text(item['itemName']),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +369,11 @@ class _PosScreenState extends State<PosScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(icon: const Icon(Icons.remove), onPressed: () => updateQuantity(item['itemCode'], item['quantity'] - 1)),
-                            Text('${item['quantity']}'),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(color: Colors.grey[900], borderRadius: BorderRadius.circular(6)),
+                              child: Text('${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                            ),
                             IconButton(icon: const Icon(Icons.add), onPressed: () => updateQuantity(item['itemCode'], item['quantity'] + 1)),
                           ],
                         ),
