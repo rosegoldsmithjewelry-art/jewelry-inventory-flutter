@@ -15,6 +15,8 @@ class ItemListScreen extends StatefulWidget {
 class _ItemListScreenState extends State<ItemListScreen> {
   List items = [];
   bool loading = true;
+  String? selectedCategory;
+  List<String> categories = [];
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
   Future<void> loadItems() async {
     setState(() => loading = true);
     items = await ItemService.getItems();
+    categories = items.map((item) => item['category'] as String).where((cat) => cat.isNotEmpty).toSet().toList()..sort();
     setState(() => loading = false);
   }
 
@@ -48,172 +51,210 @@ class _ItemListScreenState extends State<ItemListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: loadItems,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
-                  return GridView.builder(
+              child: Column(
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(8.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: items.length,
-                    itemBuilder: (context, i) {
-                      final item = items[i];
-                      final stock = item['stockQuantity'] ?? 0;
-                      final isLowStock = stock <= 2;
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: isLowStock ? Colors.red : Colors.transparent, width: isLowStock ? 2 : 0),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: item['imageUrl'] != null && item['imageUrl'] != ''
-                                  ? Hero(
-                                      tag: 'item-image-${item['itemCode']}',
-                                      child: CachedNetworkImage(
-                                        imageUrl: item['imageUrl'],
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                                        errorWidget: (context, url, error) => const Center(child: Icon(Icons.error)),
-                                      ),
-                                    )
-                                  : Hero(
-                                      tag: 'item-image-${item['itemCode']}',
-                                      child: Container(
-                                        color: Colors.grey[200],
-                                        child: const Center(child: Icon(Icons.image, size: 50)),
-                                      ),
-                                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: selectedCategory,
+                            decoration: const InputDecoration(
+                              labelText: 'Category',
+                              border: OutlineInputBorder(),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('All Categories'),
+                              ),
+                              ...categories.map((cat) => DropdownMenuItem<String>(
+                                value: cat,
+                                child: Text(cat),
+                              )),
+                            ],
+                            onChanged: (value) {
+                              setState(() => selectedCategory = value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final displayedItems = selectedCategory == null
+                            ? items
+                            : items.where((item) => item['category'] == selectedCategory).toList();
+                        int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(8.0),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 0.75,
+                          ),
+                          itemCount: displayedItems.length,
+                          itemBuilder: (context, i) {
+                            final item = displayedItems[i];
+                            final stock = item['stockQuantity'] ?? 0;
+                            final isLowStock = stock <= 2;
+                            return Card(
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: isLowStock ? Colors.red : Colors.transparent, width: isLowStock ? 2 : 0),
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    item['itemName'] ?? '',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  Expanded(
+                                    child: item['imageUrl'] != null && item['imageUrl'] != ''
+                                        ? Hero(
+                                            tag: 'item-image-${item['itemCode']}',
+                                            child: CachedNetworkImage(
+                                              imageUrl: item['imageUrl'],
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                              errorWidget: (context, url, error) => const Center(child: Icon(Icons.error)),
+                                            ),
+                                          )
+                                        : Hero(
+                                            tag: 'item-image-${item['itemCode']}',
+                                            child: Container(
+                                              color: Colors.grey[200],
+                                              child: const Center(child: Icon(Icons.image, size: 50)),
+                                            ),
+                                          ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '₱${item['price']}',
-                                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Stock: ${stock}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isLowStock ? Colors.red : Colors.grey,
-                                      fontWeight: isLowStock ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                  ),
-                                  if (isLowStock) ...[
-                                    const SizedBox(height: 4),
-                                    Row(
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(Icons.warning, color: Colors.red, size: 16),
-                                        const SizedBox(width: 4),
-                                        const Text(
-                                          'Low Stock!',
-                                          style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                                        Text(
+                                          item['itemName'] ?? '',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '₱${item['price']}',
+                                          style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Stock: ${stock}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: isLowStock ? Colors.red : Colors.grey,
+                                            fontWeight: isLowStock ? FontWeight.bold : FontWeight.normal,
+                                          ),
+                                        ),
+                                        if (isLowStock) ...[
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.warning, color: Colors.red, size: 16),
+                                              const SizedBox(width: 4),
+                                              const Text(
+                                                'Low Stock!',
+                                                style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ],
                                     ),
-                                  ],
+                                  ),
+                                  ButtonBar(
+                                    alignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed: () async {
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ProductDetailScreen(item: item),
+                                            ),
+                                          );
+                                          if (result == true) {
+                                            loadItems();
+                                          } else if (result is Map && result['addToCart'] == true) {
+                                            // Switch to POS tab with item
+                                            // For now, navigate to POS
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => PosScreen(initialItem: result['item'])),
+                                            );
+                                          }
+                                        },
+                                        icon: const Icon(Icons.visibility),
+                                        label: const Text('View'),
+                                      ),
+                                      PopupMenuButton<String>(
+                                        onSelected: (value) async {
+                                          if (value == 'edit') {
+                                            final edited = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ItemFormScreen(item: item),
+                                              ),
+                                            );
+                                            if (edited == true) loadItems();
+                                          } else if (value == 'delete') {
+                                            final confirm = await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('Delete Item'),
+                                                content: const Text('Are you sure you want to delete this item?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: const Text('Delete'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            if (!mounted) return;
+                                            if (confirm == true) {
+                                              if (!mounted) return;
+                                              try {
+                                                await ItemService.deleteItem(item['itemCode']);
+                                                loadItems();
+                                              } catch (e) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text('Failed to delete: $e')),
+                                                );
+                                              }
+                                            }
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ),
-                            ButtonBar(
-                              alignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () async {
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ProductDetailScreen(item: item),
-                                      ),
-                                    );
-                                    if (result == true) {
-                                      loadItems();
-                                    } else if (result is Map && result['addToCart'] == true) {
-                                      // Switch to POS tab with item
-                                      // For now, navigate to POS
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => PosScreen(initialItem: result['item'])),
-                                      );
-                                    }
-                                  },
-                                  icon: const Icon(Icons.visibility),
-                                  label: const Text('View'),
-                                ),
-                                PopupMenuButton<String>(
-                                  onSelected: (value) async {
-                                    if (value == 'edit') {
-                                      final edited = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ItemFormScreen(item: item),
-                                        ),
-                                      );
-                                      if (edited == true) loadItems();
-                                    } else if (value == 'delete') {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Delete Item'),
-                                          content: const Text('Are you sure you want to delete this item?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context, false),
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context, true),
-                                              child: const Text('Delete'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                      if (!mounted) return;
-                                      if (confirm == true) {
-                                        if (!mounted) return;
-                                        try {
-                                          await ItemService.deleteItem(item['itemCode']);
-                                          loadItems();
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Failed to delete: $e')),
-                                          );
-                                        }
-                                      }
-                                    }
-                                  },
-                                  itemBuilder: (context) => [
-                                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
       floatingActionButton: FloatingActionButton(

@@ -303,7 +303,13 @@ class _PosScreenState extends State<PosScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+              childAspectRatio: 0.8,
+            ),
             itemCount: displayedItems.length,
             itemBuilder: (context, i) {
               final item = displayedItems[i];
