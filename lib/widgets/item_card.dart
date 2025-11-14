@@ -16,7 +16,7 @@ class ItemCard extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin: const EdgeInsets.all(4),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
