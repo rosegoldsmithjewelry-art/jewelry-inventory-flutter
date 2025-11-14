@@ -343,6 +343,7 @@ class _PosScreenState extends State<PosScreen> {
             ),
           ),
           Expanded(
+            child: cart.isEmpty
                 ? const Center(child: Text('Cart is empty'))
                 : ListView.builder(
                     itemCount: cart.length,
