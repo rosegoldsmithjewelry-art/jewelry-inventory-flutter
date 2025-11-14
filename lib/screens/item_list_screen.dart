@@ -62,9 +62,14 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     itemCount: items.length,
                     itemBuilder: (context, i) {
                       final item = items[i];
+                      final stock = item['stockQuantity'] ?? 0;
+                      final isLowStock = stock <= 2;
                       return Card(
                         elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: isLowStock ? Colors.red : Colors.transparent, width: isLowStock ? 2 : 0),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -106,9 +111,26 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Stock: ${item['stockQuantity'] ?? 0}',
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    'Stock: ${stock}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isLowStock ? Colors.red : Colors.grey,
+                                      fontWeight: isLowStock ? FontWeight.bold : FontWeight.normal,
+                                    ),
                                   ),
+                                  if (isLowStock) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.warning, color: Colors.red, size: 16),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          'Low Stock!',
+                                          style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
