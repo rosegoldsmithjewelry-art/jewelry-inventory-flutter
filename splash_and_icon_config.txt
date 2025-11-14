@@ -1,0 +1,18 @@
+# To set up your logo as app icon and splash screen, add flutter_launcher_icons and flutter_native_splash to your pubspec.yaml:
+dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/rosegoldsmith.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/rosegoldsmith.png"
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/rosegoldsmith.png
+  android: true
+  ios: true
+  web: false

@@ -1,0 +1,45 @@
+name: rosegoldsmith
+version: 1.0.0+1
+description: Rosegoldsmith Jewelry Inventory Management Mobile App
+publish_to: 'none'
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  image_picker: ^1.0.4
+  dio: ^5.3.2
+  cached_network_image: ^3.3.0
+  flutter_dotenv: ^5.1.0
+  cupertino_icons: ^1.0.2
+  pdf: ^3.10.1
+  printing: ^5.11.0
+  share_plus: ^8.0.0
+  path_provider: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/rosegoldsmith.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/rosegoldsmith.png"
+
+flutter_native_splash:
+  color: "#FFD700"
+  image: assets/rosegoldsmith.png
+  android: true
+  ios: true
+  web: false
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/rosegoldsmith.png
+    - .env
