@@ -21,21 +21,35 @@ class ItemCard extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: item['imageUrl'] != null && item['imageUrl'] != ''
-                  ? CachedNetworkImage(
-                      imageUrl: item['imageUrl'],
-                      width: 64,
-                      height: 64,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      width: 64,
-                      height: 64,
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.image, size: 32, color: Colors.grey),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: item['imageUrl'] != null && item['imageUrl'] != ''
+                      ? CachedNetworkImage(
+                          imageUrl: item['imageUrl'],
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 72,
+                          height: 72,
+                          color: Colors.grey[900],
+                          child: const Icon(Icons.image, size: 32, color: Colors.grey),
+                        ),
+                ),
+                if ((item['stockQuantity'] ?? 0) <= 2)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
+                      child: const Text('LOW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                     ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -49,13 +63,13 @@ class ItemCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: const Color(0xFF1A1A1A),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text('Stock: $stock', style: const TextStyle(fontSize: 12)),
                       ),
                       const SizedBox(width: 8),
-                      Text('₱$price', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('₱$price', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                     ],
                   ),
                 ],

@@ -17,6 +17,8 @@ class _ItemListScreenState extends State<ItemListScreen> {
   bool loading = true;
   String? selectedCategory;
   List<String> categories = [];
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -35,17 +37,8 @@ class _ItemListScreenState extends State<ItemListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/rosegoldsmith.png',
-              width: 36,
-              height: 36,
-            ),
-            const SizedBox(width: 12),
-            const Text('Jewelry Inventory'),
-          ],
-        ),
+        title: const Text('Rosegoldsmith & Jewelry'),
+        centerTitle: false,
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -54,29 +47,53 @@ class _ItemListScreenState extends State<ItemListScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedCategory,
-                            decoration: const InputDecoration(
-                              labelText: 'Category',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: [
-                              const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text('All Categories'),
+                        TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search by name, code or material',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      searchController.clear();
+                                      setState(() => searchQuery = '');
+                                    },
+                                  )
+                                : null,
+                          ),
+                          onChanged: (v) => setState(() => searchQuery = v.trim()),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 40,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: ChoiceChip(
+                                  label: const Text('All'),
+                                  selected: selectedCategory == null,
+                                  onSelected: (_) => setState(() => selectedCategory = null),
+                                ),
                               ),
-                              ...categories.map((cat) => DropdownMenuItem<String>(
-                                value: cat,
-                                child: Text(cat),
-                              )),
+                              ...categories.map((cat) {
+                                final selected = selectedCategory == cat;
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: ChoiceChip(
+                                    label: Text(cat),
+                                    selected: selected,
+                                    selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                                    onSelected: (_) => setState(() => selectedCategory = selected ? null : cat),
+                                  ),
+                                );
+                              }).toList(),
                             ],
-                            onChanged: (value) {
-                              setState(() => selectedCategory = value);
-                            },
                           ),
                         ),
                       ],
@@ -85,9 +102,18 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        final displayedItems = selectedCategory == null
-                            ? items
-                            : items.where((item) => item['category'] == selectedCategory).toList();
+            final base = selectedCategory == null
+              ? items
+              : items.where((item) => item['category'] == selectedCategory).toList();
+            final displayedItems = searchQuery.isEmpty
+              ? base
+              : base.where((item) {
+                final q = searchQuery.toLowerCase();
+                final name = (item['itemName'] ?? '').toString().toLowerCase();
+                final code = (item['itemCode'] ?? '').toString().toLowerCase();
+                final material = (item['material'] ?? '').toString().toLowerCase();
+                return name.contains(q) || code.contains(q) || material.contains(q);
+                }).toList();
                         int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
                         return GridView.builder(
                           padding: const EdgeInsets.all(8.0),
