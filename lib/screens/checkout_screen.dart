@@ -104,6 +104,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'itemName': cartItem['itemName'],
         'quantity': cartItem['quantity'],
         'price': double.parse(cartItem['price'].toString()),
+        'imageUrl': cartItem['imageUrl'],
       }).toList();
       final payload = {
         'items': saleItems,

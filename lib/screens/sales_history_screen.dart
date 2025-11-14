@@ -141,7 +141,15 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                                         Text('Payment: ${s['paymentMethod'] ?? ''}'),
                                         const SizedBox(height: 8),
                                         const Text('Items:'),
-                                        ...((s['items'] as List<dynamic>?) ?? []).map((it) => Text('- ${it['itemName']} x${it['quantity']} @ ${it['price']}')),
+                                        ...((s['items'] as List<dynamic>?) ?? []).map((it) => Row(
+                                          children: [
+                                            it['imageUrl'] != null
+                                                ? Image.network(it['imageUrl'], width: 40, height: 40, fit: BoxFit.cover)
+                                                : const Icon(Icons.image, size: 40),
+                                            const SizedBox(width: 8),
+                                            Expanded(child: Text('${it['itemName']} x${it['quantity']} @ ₱${it['price']}')),
+                                          ],
+                                        )),
                                         const SizedBox(height: 8),
                                         Text('Total: ₱${s['total'] ?? 0}'),
                                       ],
